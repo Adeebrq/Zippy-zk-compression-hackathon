@@ -6,17 +6,21 @@ export default defineConfig({
   plugins: [
     react(),
     nodePolyfills({
+      // Whether to polyfill specific globals
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+      // Whether to polyfill `node:` protocol imports
       protocolImports: true,
     }),
   ],
-  define: {
-    'process.env': process.env,
-    global: 'globalThis',
-  },
   resolve: {
     alias: {
+      // You can keep these if needed
       stream: 'stream-browserify',
-      crypto: 'crypto-browserify',
+      util: 'util',
     },
   },
 });

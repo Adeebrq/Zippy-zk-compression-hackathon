@@ -1,6 +1,8 @@
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
+import 'crypto-browserify';
+window.process = window.process || { env: {} };
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
