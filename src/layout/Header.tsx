@@ -16,7 +16,8 @@ const Header = () => {
   return (
     <HeaderBox>
       <LeftBox>
-        <LogoText>SolMate</LogoText>
+        <LogoText>Zippy</LogoText>
+        <PunchLine>The CPOP dApp</PunchLine>
       </LeftBox>
       <RightBox>
 
@@ -50,6 +51,7 @@ const HeaderBox = styled.div`
 const LeftBox = styled.div`
   display: flex;
   align-items: center;
+  flex-direction: column;
 `;
 
 const RightBox = styled.div`
@@ -64,12 +66,13 @@ const LogoText = styled.p`
   font-size: 24px;
   font-weight: bold;
   margin: 0;
+  font-family: "MyCustomFont";
 `;
 
-const HeaderText = styled.p`
-  color: ${(props) => props.theme.text};
-  margin: 0;
-`;
+
+const PunchLine = styled.div`
+  font-size: 8px;
+`
 
 const CopyKey = styled.p`
   cursor: pointer;

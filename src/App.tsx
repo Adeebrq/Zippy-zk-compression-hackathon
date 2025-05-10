@@ -7,6 +7,8 @@ import CreatorPage from './pages/CreatorPage';
 
 import './App.css';
 import Layout from './layout/Layout';
+import LandingPage from './pages/LandingPage.tsx';
+import AttendeePage from './pages/AttendeePage.tsx';
 
 // Wrapper component to handle theme switching
 const AppWithTheme = () => {
@@ -17,7 +19,9 @@ const AppWithTheme = () => {
      <Router>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<CreatorPage />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/CreatorPage" element={<CreatorPage />} />
+          <Route path="/AttendeePage" element={<AttendeePage />} />
         </Route>
       </Routes>
     </Router>
