@@ -3,20 +3,24 @@ import { useWalletContext } from '../components/useWalletContext';
 import styled, { keyframes } from 'styled-components';
 import { useThemeContext } from '../components/useThemeContext';
 import { MdLightMode, MdDarkMode } from "react-icons/md";
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
 const copyText = (text: string) => {
   navigator.clipboard.writeText(text);
+  toast.success("Copied your public address")
 };
 
 const Header = () => {
   const { connect, connected, disconnect, publicKey } = useWalletContext();
   const { theme, toggleTheme } = useThemeContext();
+  const navigate = useNavigate()
 
   return (
     <HeaderBox>
       <LeftBox>
-        <LogoText>Zippy</LogoText>
+        <LogoText><span onClick={()=> navigate('/')} style={{cursor: "pointer"}}>Zippy </span></LogoText>
         <PunchLine>The CPOP dApp</PunchLine>
       </LeftBox>
       <RightBox>

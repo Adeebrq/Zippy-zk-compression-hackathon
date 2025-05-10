@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import HeartIcon from "../assets/heartIcon.png"
 
 const Footer = () => {
   return (

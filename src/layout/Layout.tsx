@@ -5,18 +5,16 @@ import { useThemeContext } from '../components/useThemeContext'
 
 const Layout = () => {
   const { theme } = useThemeContext();
-  
+
   return (
     <div className={`app-background min-h-screen ${theme}`}>
-      <Header />
+    <Header />
       <main className="container mx-auto px-4 py-8">
-        <Outlet />
+    <Outlet />
       </main>
       <Footer />
-    </div>
+  </div>
   )
 }
 
 export default Layout
-
-// ({ toggleTheme }: { toggleTheme: () => void }

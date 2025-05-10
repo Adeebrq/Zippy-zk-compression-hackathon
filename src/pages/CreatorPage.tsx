@@ -23,7 +23,11 @@ import { useWalletContext } from '../components/useWalletContext';
 import { debounce } from 'lodash';
 import './CreatorPage.css';
 import { useAnimatedValue } from '../hooks/useAnimatedValue';
-// import { useFetchMetadataTokens } from "../components/useFetchMetadataTokens";
+import { toast } from 'react-toastify';
+import { useRegularTokenAccounts} from '../components/useFetchMetadataTokens';
+import Modal, { SuccessMessage, SuccessTitle, TokenInfo, ShareLink, AddressMono } from '../components/Modal';
+import { useThemeContext } from '../components/useThemeContext';
+import styled from 'styled-components';
 
 export interface MintViewData {
   mint: PublicKey;
@@ -33,14 +37,17 @@ export interface MintViewData {
 }
 
 const CreatorPage = () => {
-  const { publicKey, connect, disconnect, network, connected, connection, signTransaction, sendTransaction } = useWalletContext();
-  // const { tokens, loading,} = useFetchMetadataTokens();
+  const { publicKey, network, connected, connection, signTransaction, sendTransaction } = useWalletContext();
+  const { tokenAccounts } = useRegularTokenAccounts(2);
+  const { theme } = useThemeContext();
+  const isDark = theme === 'dark';
   const [balance, setBalance] = useState<number>(0);
   const [mintAddress, setMintAddress] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [mintData, setMintData] = useState<MintViewData | null>(null);
-
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [hasShownModal, setHasShownModal] = useState(false);
 
   // State variables for token metadata
   const [tokenName, setTokenName] = useState<string>('');
@@ -79,23 +86,23 @@ const CreatorPage = () => {
   // Create compressed token function - using connection from props
   const createCompressedToken = async () => {
     if (!publicKey || !connection || !signTransaction || !sendTransaction) {
-      setError('Wallet not connected');
+      toast.error('Wallet not connected');
       return null;
     }
 
     // Validate inputs
     if (!tokenName.trim()) {
-      setError('Token name is required');
+       toast.error('Token name is required')
       return null;
     }
 
     if (!tokenSymbol.trim()) {
-      setError('Token symbol is required');
+      toast.error('Token symbol is required');
       return null;
     }
 
     if (isNaN(Number(tokenSupply)) || Number(tokenSupply) <= 0) {
-      setError('Token supply must be a positive number');
+      toast.error('Token supply must be a positive number');
       return null;
     }
 
@@ -253,6 +260,12 @@ const CreatorPage = () => {
       setMintAddress(mint.publicKey.toBase58());
       setMetadataCreated(true);
 
+      toast.success("Token minted successfully! 🎉", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+  
+
       return result;
     } catch (err: any) {
       console.error('Error creating compressed token:', err);
@@ -297,6 +310,13 @@ const CreatorPage = () => {
 
       console.log("Fetched metadata:", metadata);
       setFetchedMetadata(metadata);
+
+
+      toast.success("Fetched metadata successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+
       return metadata;
     } catch (err: any) {
       console.error('Error fetching token metadata:', err);
@@ -317,8 +337,11 @@ const CreatorPage = () => {
       await connection.confirmTransaction(signature, 'confirmed');
       await fetchBalance();
       console.log("Airdrop successful:", signature);
+      toast.success("Recieved Airdrop! 🎉");
+  
     } catch (err: any) {
       setError(`Airdrop failed: ${err.message || String(err)}`);
+      toast.error("An error has occured");
     } finally {
       setIsLoading(false);
     }
@@ -340,293 +363,309 @@ const CreatorPage = () => {
     }
   }, [mintAddress, connection, metadataCreated]);
 
+  // Update the effect to only show modal on initial creation
+  useEffect(() => {
+    if (mintAddress && mintData && fetchedMetadata && !hasShownModal) {
+      setShowSuccessModal(true);
+      setHasShownModal(true);
+    }
+  }, [mintAddress, mintData, fetchedMetadata, hasShownModal]);
+
   return (
     <>
-    {!connected ? (
-       <div className="unconnected-container">
-       <div id="Connection-message-wrapper">
-       <p>Welcome to the Creator portal! </p>
-       <span id="Connection-message">Connect your wallet to start minting your CPOP Tokens! 🤘 </span>
-       </div>
-      </div>
-    )
-      : (
-      <>
-      <div className="titleBody">
-        <h1 className="page-title">Compressed Token Generator</h1>
-        {connected &&
-        <div className='titleBodyLeft'>
-          <div>
-            <p>{network} <span className="connection-indicator"></span></p>
-            <p id="connectionStatus">Connection stable</p>
-          </div>
-          <div className="vertical-separator"></div>
-          <div className='balanceSection'>
-            <div className="balanceBody">
-              <p key={animationKey} className='animatedValue'>{animatedBalance.toFixed(2)} SOL</p>
-              <button
-                onClick={requestAirdrop}
-                disabled={isLoading}
-                className={`airdrop-button ${isLoading ? 'disabled' : ''}`}
-              >
-                {isLoading ? 'Processing...' : 'Request Airdrop'}
-              </button>
-            </div>
+      {!connected ? (
+        <div className="unconnected-container">
+          <div id="Connection-message-wrapper">
+            <p>Welcome to the Creator portal! </p>
+            <span id="Connection-message">Connect your wallet to start minting your CPOP Tokens! 🤘 </span>
           </div>
         </div>
-        }
-      </div>
-      <div className="creator-container">
-        {connected && !mintAddress && (
-          <div className="token-details-card">
-            <h2 className="section-heading-parent">Compressed Token Mint</h2>
-            <h2 className="section-heading">Token Details</h2>
-
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">Token Name*</label>
-                <input
-                  type="text"
-                  value={tokenName}
-                  onChange={(e) => setTokenName(e.target.value)}
-                  className="form-input"
-                  placeholder="My Compressed Token"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Token Symbol*</label>
-                <input
-                  type="text"
-                  value={tokenSymbol}
-                  onChange={(e) => setTokenSymbol(e.target.value)}
-                  className="form-input"
-                  placeholder="CTKN"
-                  maxLength={10}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Description</label>
-              <textarea
-                value={tokenDescription}
-                onChange={(e) => setTokenDescription(e.target.value)}
-                className="form-textarea"
-                placeholder="A description of your compressed token"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Image URL</label>
-              <input
-                type="text"
-                value={tokenImage}
-                onChange={(e) => setTokenImage(e.target.value)}
-                className="form-input"
-                placeholder="https://example.com/token-image.png"
-              />
-            </div>
-            <p style={{fontSize: '20px', fontWeight: "600", marginTop: '60px'}}>Token Settings</p>
-
-            <div className="form-grid-triple">
-              <div className="form-group">
-                <label className="form-label">Decimals</label>
-                <input
-                  type="number"
-                  value={tokenDecimals}
-                  onChange={(e) => setTokenDecimals(Number(e.target.value))}
-                  className="form-input"
-                  min={0}
-                  max={9}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Initial Supply</label>
-                <input
-                  type="text"
-                  value={tokenSupply}
-                  onChange={(e) => setTokenSupply(e.target.value)}
-                  className="form-input"
-                  placeholder="1000000"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Royalty (basis points)</label>
-                <input
-                  type="number"
-                  value={royaltyFeeBps}
-                  onChange={(e) => setRoyaltyFeeBps(Number(e.target.value))}
-                  className="form-input"
-                  min={0}
-                  max={10000}
-                  placeholder="0-10000 (100 = 1%)"
-                />
-                <p className="form-hint">100 = 1%, 1000 = 10%</p>
-              </div>
-            </div>
-
-            <div className="button-container">
-              <button
-                onClick={debouncedCreateCompressedToken}
-                disabled={isLoading || !tokenName || !tokenSymbol || balance <= 0}
-                className={`create-token-button ${(isLoading || !tokenName || !tokenSymbol || balance <= 0) ? 'disabled' : ''}`}
-              >
-                {isLoading ? 'Creating Token...' : 'Create Compressed Token with Metadata'}
-              </button>
-              <p className="button-hint">
-                This will create both the token mint and associated metadata.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* {connected && (
-          <>
-            <p>{publicKey || connected ? "SPL Tokens" : null}</p>
-            {publicKey && tokens.map((token) => (
-              <div key={token?.tokenName} className="tokenCard">
-                <img
-                  src={token.uri}
-                  alt={`${token.tokenName} logo`}
-                  className="tokenLogo"
-                />
-                <div className="tokenInfo">
-                  <div className="tokenHeader">
-                    <p className="tokenName">{token?.tokenName}</p>
-                    <a href={`https://explorer.solana.com/address/${token.mint}?cluster=devnet`} target="_blank">
-                      <p style={{color: "#6B77FF", textDecoration: "none"}}>View on Explorer</p>
-                    </a>
+      ) : (
+        <>
+          <div className="titleBody">
+            <h1 className="page-title">Compressed Token Generator</h1>
+            {connected && (
+              <div className='titleBodyLeft'>
+                <div>
+                  <p>{network} <span className="connection-indicator"></span></p>
+                  <p id="connectionStatus">Connection stable</p>
+                </div>
+                <div className="vertical-separator"></div>
+                <div className='balanceSection'>
+                  <div className="balanceBody">
+                    <p key={animationKey} className='animatedValue'>{animatedBalance.toFixed(2)} SOL</p>
+                    <button
+                      onClick={requestAirdrop}
+                      disabled={isLoading}
+                      className={`airdrop-button ${isLoading ? 'disabled' : ''}`}
+                    >
+                      {isLoading ? 'Processing...' : 'Request Airdrop'}
+                    </button>
                   </div>
-                  <p className="tokenSymbol">{token?.symbol}</p>
-                  <p className="tokenAmount">amount: {token?.amount}</p>
                 </div>
               </div>
-            ))}
-          </>
-        )} */}
+            )}
+          </div>
+          <div className="creator-container">
+            {connected && !mintAddress && (
+              <div className="token-details-card">
+                <h2 className="section-heading-parent">Compressed Token Mint</h2>
+                <h2 className="section-heading">Token Details</h2>
 
-        {mintAddress && mintData && (
-          <div className="token-success-card">
-            <h3 className="success-heading">Token Created Successfully! 🤘</h3>
-            <p className="mint-address">Mint Address: <span className="address-mono">{mintAddress}</span></p>
-            <div className="token-info-section">
-              <p className="token-info-heading">Token Details:</p>
-              <ul className="token-info-list">
-                <li>Name: {tokenName}</li>
-                <li>Symbol: {tokenSymbol}</li>
-                <li>Decimals: {tokenDecimals}</li>
-                <li>Metadata: {metadataCreated ? 'Created ✓' : 'Pending...'}</li>
-                <li>Associated Token Account: <span className="address-mono small">{mintData.ata?.toBase58()}</span></li>
-              </ul>
-            </div>
-            <div className="transactions-section">
-              <p className="transactions-heading">Transactions:</p>
-              <ul className="transactions-list">
-                <li>
-                  <span className="transaction-type">Create Mint Signature:</span>
-                  <a
-                    href={`https://explorer.solana.com/tx/${mintData.transactions.createMintTransactionSignature}?cluster=devnet`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transaction-link"
-                  >
-                    {mintData.transactions.createMintTransactionSignature.slice(0, 12)}...
-                    (View on explorer)
-                  </a>
-                </li>
-                <li>
-                  <span className="transaction-type">Mint Tokens Signature:</span>
-                  <a
-                    href={`https://explorer.solana.com/tx/${mintData.transactions.mintToTransactionSignature}?cluster=devnet`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transaction-link"
-                  >
-                    {mintData.transactions.mintToTransactionSignature.slice(0, 12)}...
-                    (View on explorer)
-                  </a>
-                </li>
-              </ul>
-            </div>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label className="form-label">Token Name*</label>
+                    <input
+                      type="text"
+                      value={tokenName}
+                      onChange={(e) => setTokenName(e.target.value)}
+                      className="form-input"
+                      placeholder="My Compressed Token"
+                      required
+                    />
+                  </div>
 
-            <div className="metadata-section">
-              <div className="metadata-header">
-                <h4 className="metadata-heading">Token Metadata</h4>
-                <button
-                  onClick={fetchMetadata}
-                  disabled={isFetchingMetadata}
-                  className={`refresh-metadata-button ${isFetchingMetadata ? 'disabled' : ''}`}
-                >
-                  {isFetchingMetadata ? 'Loading...' : 'Refresh Metadata'}
-                </button>
+                  <div className="form-group">
+                    <label className="form-label">Token Symbol*</label>
+                    <input
+                      type="text"
+                      value={tokenSymbol}
+                      onChange={(e) => setTokenSymbol(e.target.value)}
+                      className="form-input"
+                      placeholder="CTKN"
+                      maxLength={10}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Description</label>
+                  <textarea
+                    value={tokenDescription}
+                    onChange={(e) => setTokenDescription(e.target.value)}
+                    className="form-textarea"
+                    placeholder="A description of your compressed token"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Image URL</label>
+                  <input
+                    type="text"
+                    value={tokenImage}
+                    onChange={(e) => setTokenImage(e.target.value)}
+                    className="form-input"
+                    placeholder="https://example.com/token-image.png"
+                  />
+                </div>
+                <p style={{fontSize: '20px', fontWeight: "600", marginTop: '60px'}}>Token Settings</p>
+
+                <div className="form-grid-triple">
+                  <div className="form-group">
+                    <label className="form-label">Decimals</label>
+                    <input
+                      type="number"
+                      value={tokenDecimals}
+                      onChange={(e) => setTokenDecimals(Number(e.target.value))}
+                      className="form-input"
+                      min={0}
+                      max={9}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Initial Supply</label>
+                    <input
+                      type="text"
+                      value={tokenSupply}
+                      onChange={(e) => setTokenSupply(e.target.value)}
+                      className="form-input"
+                      placeholder="1000000"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Royalty (basis points)</label>
+                    <input
+                      type="number"
+                      value={royaltyFeeBps}
+                      onChange={(e) => setRoyaltyFeeBps(Number(e.target.value))}
+                      className="form-input"
+                      min={0}
+                      max={10000}
+                      placeholder="0-10000 (100 = 1%)"
+                    />
+                    <p className="form-hint">100 = 1%, 1000 = 10%</p>
+                  </div>
+                </div>
+
+                <div className="button-container">
+                  <button
+                    onClick={debouncedCreateCompressedToken}
+                    disabled={isLoading || !tokenName || !tokenSymbol || balance <= 0}
+                    className={`create-token-button ${(isLoading || !tokenName || !tokenSymbol || balance <= 0) ? 'disabled' : ''}`}
+                  >
+                    {isLoading ? 'Creating Token...' : 'Create Compressed Token with Metadata'}
+                  </button>
+                  <p className="button-hint">
+                    This will create both the token mint and associated metadata.
+                  </p>
+                </div>
               </div>
+            )}
 
-              {isFetchingMetadata && (
-                <div className="loading-message">Fetching metadata...</div>
-              )}
+            {mintAddress && mintData && (
+              <div className="token-success-card">
+                <h3 className="success-heading">Token Created Successfully! 🤘</h3>
+                <p className="mint-address">Mint Address: <span className="address-mono">{mintAddress}</span></p>
+                <div className="token-info-section">
+                  <p className="token-info-heading">Token Details:</p>
+                  <ul className="token-info-list">
+                    <li>Name: {tokenName}</li>
+                    <li>Symbol: {tokenSymbol}</li>
+                    <li>Decimals: {tokenDecimals}</li>
+                    <li>Metadata: {metadataCreated ? 'Created ✓' : 'Pending...'}</li>
+                    <li>Associated Token Account: <span className="address-mono small">{mintData.ata?.toBase58()}</span></li>
+                  </ul>
+                </div>
+                <div className="transactions-section">
+                  <p className="transactions-heading">Transactions:</p>
+                  <ul className="transactions-list">
+                    <li>
+                      <span className="transaction-type">Create Mint Signature:</span>
+                      <a
+                        href={`https://explorer.solana.com/tx/${mintData.transactions.createMintTransactionSignature}?cluster=devnet`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="transaction-link"
+                      >
+                        {mintData.transactions.createMintTransactionSignature.slice(0, 12)}...
+                        (View on explorer)
+                      </a>
+                    </li>
+                    <li>
+                      <span className="transaction-type">Mint Tokens Signature:</span>
+                      <a
+                        href={`https://explorer.solana.com/tx/${mintData.transactions.mintToTransactionSignature}?cluster=devnet`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="transaction-link"
+                      >
+                        {mintData.transactions.mintToTransactionSignature.slice(0, 12)}...
+                        (View on explorer)
+                      </a>
+                    </li>
+                    <li>
+                      <span className="transaction-type">Share Link:</span>
+                      <ShareLink 
+                        href={`/ClaimPage/${mintAddress}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        $isDark={isDark}
+                      >
+                        {`${window.location.origin}/ClaimPage/${mintAddress}`}
+                      </ShareLink>
+                    </li>
+                  </ul>
+                </div>
 
-              {fetchedMetadata ? (
-                <div className="metadata-card">
-                  <div className="metadata-grid">
-                    <div className="metadata-key">Name:</div>
-                    <div className="metadata-value">{fetchedMetadata.name}</div>
+                <div className="metadata-section">
+                  <div className="metadata-header">
+                    <h4 className="metadata-heading">Token Metadata</h4>
+                    <button
+                      onClick={fetchMetadata}
+                      disabled={isFetchingMetadata}
+                      className={`refresh-metadata-button ${isFetchingMetadata ? 'disabled' : ''}`}
+                    >
+                      {isFetchingMetadata ? 'Loading...' : 'Refresh Metadata'}
+                    </button>
+                  </div>
 
-                    <div className="metadata-key">Symbol:</div>
-                    <div className="metadata-value">{fetchedMetadata.symbol}</div>
+                  {isFetchingMetadata && (
+                    <div className="loading-message">Fetching metadata...</div>
+                  )}
 
-                    <div className="metadata-key">URI:</div>
-                    <div className="metadata-value break-all">
-                      {fetchedMetadata.uri &&
-                       <a
-                       href={fetchedMetadata.uri}
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       className="metadata-link"
-                     >
-                       {fetchedMetadata.uri}
-                     </a>
-                      }
-                      Nil
-                    </div>
+                  {fetchedMetadata ? (
+                    <div className="metadata-card">
+                      <div className="metadata-grid">
+                        <div className="metadata-key">Name:</div>
+                        <div className="metadata-value">{fetchedMetadata.name}</div>
 
-                    {fetchedMetadata.additionalMetadata && fetchedMetadata.additionalMetadata.length > 0 && (
-                      <>
-                        <div className="metadata-key">Additional Metadata:</div>
-                        <div className="metadata-value">
-                          <ul className="additional-metadata-list">
-                            {fetchedMetadata.additionalMetadata.map((item, index) => (
-                              <li key={index}><span className="metadata-item-key">{item[0]}:</span> {item[1]}</li>
-                            ))}
-                          </ul>
+                        <div className="metadata-key">Symbol:</div>
+                        <div className="metadata-value">{fetchedMetadata.symbol}</div>
+
+                        <div className="metadata-key">URI:</div>
+                        <div className="metadata-value break-all">
+                          {fetchedMetadata.uri &&
+                           <a
+                           href={fetchedMetadata.uri}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="metadata-link"
+                         >
+                           {fetchedMetadata.uri}
+                         </a>
+                          }
+                          Nil
                         </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ) : metadataCreated ? (
-                <div className="metadata-prompt">
-                  Click "Refresh Metadata" to view the token's metadata
-                </div>
-              ) : null}
-            </div>
-          </div>
-        )}
 
-        {error && (
-          <div className="error-card">
-            <h3 className="error-heading">Error</h3>
-            <p className="error-message">{error}</p>
+                        {fetchedMetadata.additionalMetadata && fetchedMetadata.additionalMetadata.length > 0 && (
+                          <>
+                            <div className="metadata-key">Additional Metadata:</div>
+                            <div className="metadata-value">
+                              <ul className="additional-metadata-list">
+                                {fetchedMetadata.additionalMetadata.map((item, index) => (
+                                  <li key={index}><span className="metadata-item-key">{item[0]}:</span> {item[1]}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ) : metadataCreated ? (
+                    <div className="metadata-prompt">
+                      Click "Refresh Metadata" to view the token's metadata
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="error-card">
+                <h3 className="error-heading">Error</h3>
+                <p className="error-message">{error}</p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      </>
-    )}
-  
+        </>
+      )}
+
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Compressed token minted successfully!"
+        mintAddress={mintAddress}
+        fetchedMetadata={fetchedMetadata}
+      >
+        <SuccessMessage>
+          <SuccessTitle>🎉 Congratulations! Your token has been created successfully!</SuccessTitle>
+          <TokenInfo $isDark={isDark}>Token Name: {fetchedMetadata?.name}</TokenInfo>
+          <TokenInfo $isDark={isDark}>Token Symbol: {fetchedMetadata?.symbol}</TokenInfo>
+          <TokenInfo $isDark={isDark}>Mint Address: <AddressMono>{mintAddress}</AddressMono></TokenInfo>
+          <TokenInfo $isDark={isDark}>Share this link to airdrop your tokens:</TokenInfo>
+          <ShareLink 
+            href={`/ClaimPage/${mintAddress}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            $isDark={isDark}
+          >
+            {`${window.location.origin}/ClaimPage/${mintAddress}`}
+          </ShareLink>
+        </SuccessMessage>
+      </Modal>
     </>
   );
 };
