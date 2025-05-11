@@ -7,10 +7,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-import { CustomWalletProvider } from './components/useWalletContext.tsx'
+import { CustomWalletProvider } from './hooks/useWalletContext.tsx'
 import { WalletProvider } from "@solana/wallet-adapter-react";
 import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets'
-// import { CompressedTokenBalancesProvider} from './components/useFetchMetadataTokens.tsx';
+
 
 const wallets = [
   new PhantomWalletAdapter(),
@@ -21,9 +21,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <WalletProvider wallets={wallets}>
       <CustomWalletProvider>
-      {/* <CompressedTokenBalancesProvider> */}
         <App />
-        {/* </CompressedTokenBalancesProvider> */}
       </CustomWalletProvider>
     </WalletProvider>
   </StrictMode>,

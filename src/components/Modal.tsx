@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useThemeContext } from './useThemeContext';
+import { useThemeContext } from '../hooks/useThemeContext';
 import styled from 'styled-components';
 import Confetti from 'react-confetti';
 import { IoClose } from 'react-icons/io5';

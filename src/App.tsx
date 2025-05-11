@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { ThemeProvider as CustomThemeProvider, useThemeContext } from './components/useThemeContext.tsx';
+import { ThemeProvider as CustomThemeProvider, useThemeContext } from './hooks/useThemeContext.tsx';
 import { lightTheme, darkTheme } from './components/theme';
 import CreatorPage from './pages/CreatorPage';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import BackgroundVideo from "./components/BackgroundVideo";
 
 import './App.css';
 import Layout from './layout/Layout';
@@ -21,6 +21,7 @@ const AppWithTheme = () => {
   return (
     <StyledThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
      <Router>
+
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<LandingPage />} />
@@ -34,13 +35,11 @@ const AppWithTheme = () => {
   );
 };
 
-
 function App() {
-
   return (
     <CustomThemeProvider>
-    <AppWithTheme />
-  </CustomThemeProvider>
+      <AppWithTheme />
+    </CustomThemeProvider>
   );
 }
 

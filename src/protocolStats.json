@@ -1,0 +1,43 @@
+[
+    {
+      "id": 1,
+      "title": "100 Token Accounts",
+      "traditionalCost": "0.2 SOL",
+      "compressedCost": "0.00004 SOL",
+      "savings": "99.98%",
+      "efficiency": "5000x cheaper"
+    },
+    {
+      "id": 2,
+      "title": "100-Byte PDA Account",
+      "traditionalCost": "0.0016 SOL",
+      "compressedCost": "0.00001 SOL",
+      "savings": "99.38%",
+      "efficiency": "160x cheaper"
+    },
+    {
+      "id":3,
+      "title": "1 Million Token Airdrop",
+      "traditionalCost": "260,000 SOL",
+      "compressedCost": "50 SOL",
+      "savings": "99.98%",
+      "efficiency": "5200x cheaper"
+    },
+    {
+      "id": 4,
+      "title": "Compressed NFT Storage",
+      "traditionalCost": "0.012 SOL",
+      "compressedCost": "0.000005 SOL",
+      "savings": "99.96%",
+      "efficiency": "2400x cheaper"
+    },
+    {
+      "id": 5,
+      "title": "Event Participation (10K users)",
+      "traditionalCost": "2000 SOL",
+      "compressedCost": "0.4 SOL",
+      "savings": "99.98%",
+      "efficiency": "5000x cheaper"
+    }
+  ]
+  

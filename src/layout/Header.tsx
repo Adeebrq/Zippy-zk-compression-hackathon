@@ -1,9 +1,9 @@
 import React from 'react';
-import { useWalletContext } from '../components/useWalletContext';
+import { useWalletContext } from '../hooks/useWalletContext';
 import styled, { keyframes } from 'styled-components';
-import { useThemeContext } from '../components/useThemeContext';
+import { useThemeContext } from '../hooks/useThemeContext';
 import { MdLightMode, MdDarkMode } from "react-icons/md";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 
@@ -15,7 +15,9 @@ const copyText = (text: string) => {
 const Header = () => {
   const { connect, connected, disconnect, publicKey } = useWalletContext();
   const { theme, toggleTheme } = useThemeContext();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/';
 
   return (
     <HeaderBox>
@@ -24,18 +26,21 @@ const Header = () => {
         <PunchLine>The CPOP dApp</PunchLine>
       </LeftBox>
       <RightBox>
-
-        {!connected ? (
-          <StyledButton onClick={connect}>Connect Wallet</StyledButton>
-        ) : (
-          <StyledButton onClick={disconnect}>Disconnect Wallet</StyledButton>
+        {!isLandingPage && (
+          <>
+            {!connected ? (
+              <StyledButton onClick={connect}>Connect Wallet</StyledButton>
+            ) : (
+              <StyledButton onClick={disconnect}>Disconnect Wallet</StyledButton>
+            )}
+            {publicKey ? (
+              <CopyKey onClick={() => copyText(publicKey.toBase58())}>
+                {publicKey.toBase58().substring(0, 7)}...
+              </CopyKey>
+            ) : null}
+          </>
         )}
-        {publicKey ? (
-          <CopyKey onClick={() => copyText(publicKey.toBase58())}>
-            {publicKey.toBase58().substring(0, 7)}...
-          </CopyKey>
-        ) : null}
-          <ThemeButton onClick={toggleTheme}>
+        <ThemeButton onClick={toggleTheme}>
           {theme === 'light' ? <MdDarkMode size={24} color="black" /> : <MdLightMode size={24} color="white" />}
         </ThemeButton>
       </RightBox>
@@ -50,6 +55,7 @@ const HeaderBox = styled.div`
   border-bottom: 1px solid ${(props) => props.theme.border};
   background: ${(props) => props.theme.background};
   padding: 10px;
+  z-index: 1000;
 `;
 
 const LeftBox = styled.div`
@@ -153,14 +159,14 @@ const StyledButton = styled.button`
     &::before {
       opacity: 1;
     }
-    color: white;
+    color: ${(props) => props.theme.text};
   }
 
   &:active {
     &::after {
       background: transparent;
     }
-    color: white;
+    color: ${(props) => props.theme.text};
   }
 `;
 
