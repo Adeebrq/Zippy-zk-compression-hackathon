@@ -84,10 +84,7 @@ const ClaimPage = () => {
 
     try {
       setIsLoading(true);
-      const mintPublicKey = new PublicKey(tokenAddress);
-      console.log(publicKey.toBase58(), "publicKey")
-      console.log(mintPublicKey.toBase58(), "mintPublicKey")
-      
+      const mintPublicKey = new PublicKey(tokenAddress);      
       const txId = await HandleCompressedTransfer(
         connection,
         connection,

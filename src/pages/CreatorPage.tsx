@@ -79,7 +79,6 @@ const CreatorPage = () => {
     if (publicKey && connection) {
       const balance = await connection.getBalance(publicKey);
       setBalance(balance / LAMPORTS_PER_SOL);
-      console.log("Wallet PublicKey:", publicKey.toBase58());
     }
   };
 
@@ -114,7 +113,6 @@ const CreatorPage = () => {
       const decimals = Number(tokenDecimals);
       const mint = Keypair.generate();
 
-      console.log("compressed mint", mint.publicKey.toBase58());
 
       // Create metadata object
       const metadata: TokenMetadata = {
@@ -186,7 +184,6 @@ const CreatorPage = () => {
 
       // Simulate transaction first - using connection prop from useWallet()
       const createMintSimulation = await connection.simulateTransaction(createMintTransaction);
-      console.log("simulation", createMintSimulation);
 
       // Send the transaction
       const createMintTransactionSignature = await sendTransaction(
@@ -197,7 +194,6 @@ const CreatorPage = () => {
         }
       );
 
-      console.log(`createMintTransactionSignature: ${createMintTransactionSignature}`);
 
       // 2. CREATE ASSOCIATED TOKEN ACCOUNT AND MINT TOKENS
       const associatedToken = await getAssociatedTokenAddress(
@@ -235,7 +231,7 @@ const CreatorPage = () => {
 
       // Simulate transaction - using connection prop from useWallet()
       const mintToSimulation = await connection.simulateTransaction(mintToTransaction);
-      console.log("mintToSimulation", mintToSimulation);
+
 
       // Send the transaction
       const mintToTransactionSignature = await sendTransaction(
@@ -243,7 +239,6 @@ const CreatorPage = () => {
         connection
       );
 
-      console.log(`mintToTransactionSignature: ${mintToTransactionSignature}`);
 
       // Create the initial result object
       const result: MintViewData = {
@@ -263,20 +258,15 @@ const CreatorPage = () => {
       // Add a delay before proceeding with the transfer
       console.log("Waiting 3 seconds before proceeding with transfer...");
       await new Promise(resolve => setTimeout(resolve, 4500));
-      console.log("Proceeding with transfer...");
 
       // 3. TRANSFER TOKENS TO PROGRAM WALLET (separate transaction)
       try {
         if (!adminKeypair) {
           throw new Error('Admin keypair not available');
         }
-
-        console.log("Attempting to transfer tokens to admin wallet:", adminKeypair.publicKey.toBase58());
         
         // Get user's ATA for this token (we already have this from minting)
         const userAta = associatedToken;
-        
-        console.log("Setting up token compression...");
         
         // We need to get the token pool info for the mint
         const tokenPoolInfos = await getTokenPoolInfos(connection, mint.publicKey);
@@ -320,8 +310,6 @@ const CreatorPage = () => {
           connection
         );
         
-        console.log(`Transfer transaction signature: ${transferTxSignature}`);
-        
         // Update the result object with the transfer transaction
         result.transactions.transferTransactionSignature = transferTxSignature;
         
@@ -359,7 +347,6 @@ const CreatorPage = () => {
     setError(null);
 
     try {
-      console.log("Fetching metadata for mint:", mintAddress);
       const mintPublicKey = new PublicKey(mintAddress);
 
       const metadata = await getTokenMetadata(
@@ -402,11 +389,9 @@ const CreatorPage = () => {
 
     setIsLoading(true);
     try {
-      console.log("Requesting airdrop to:", publicKey.toBase58());
       const signature = await connection.requestAirdrop(publicKey, LAMPORTS_PER_SOL);
       await connection.confirmTransaction(signature, 'confirmed');
       await fetchBalance();
-      console.log("Airdrop successful:", signature);
       toast.success("Recieved Airdrop! 🎉");
   
     } catch (err: any) {

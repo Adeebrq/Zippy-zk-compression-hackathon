@@ -98,7 +98,6 @@ export const CustomWalletProvider = ({ children }: { children: React.ReactNode }
         // Get the data
         const data = walletDoc.data();
 
-        console.log("Fetched admin key data:", data);
 
         // Validate the secret key format
         if (!data.secretKey || typeof data.secretKey !== 'string') {
@@ -173,7 +172,6 @@ export const CustomWalletProvider = ({ children }: { children: React.ReactNode }
         }).filter((t): t is TokenInfo => t !== null);
         
         setTokenBalance(tokens);
-        console.log(tokenBalance);
       };
       
       fetchAdminKeys();

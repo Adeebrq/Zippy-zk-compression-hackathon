@@ -45,10 +45,6 @@ export const HandleCompressedTransfer = async (
       recipientPublicKey,
       { mint: mintPublicKey }
     );
-    console.log('Recipient compressed token accounts before transfer:', recipientAccounts.items);
-    recipientAccounts.items.forEach((account, index) => {
-      console.log(`Account ${index}: Amount = ${parseInt(account.parsed.amount, 16)}`);
-    });
 
     // Enforce single-account policy: Only allow transfer if no accounts exist
     if (recipientAccounts.items.length > 0) {
@@ -107,24 +103,19 @@ export const HandleCompressedTransfer = async (
       lastValidBlockHeight: (await connection.getLatestBlockhash()).lastValidBlockHeight,
     });
 
-    console.log('Transfer transaction successful:', signature);
 
     // Check recipient accounts after transfer
     const postTransferRecipientAccounts = await rpc.getCompressedTokenAccountsByOwner(
       recipientPublicKey,
       { mint: mintPublicKey }
     );
-    console.log('Recipient compressed token accounts after transfer:', postTransferRecipientAccounts.items);
-    postTransferRecipientAccounts.items.forEach((account, index) => {
-      console.log(`Account ${index}: Amount = ${parseInt(account.parsed.amount, 16)}`);
-    });
 
     // Calculate and log total balance
     const totalBalance = postTransferRecipientAccounts.items.reduce(
       (sum, account) => sum + parseInt(account.parsed.amount, 16),
       0
     );
-    console.log(`Recipient total balance for mint ${mintPublicKey}: ${totalBalance}`);
+
 
     // Verify single-account policy
     if (postTransferRecipientAccounts.items.length > 1) {
