@@ -418,6 +418,7 @@ const CreatorPage = () => {
       return () => clearTimeout(timer);
     }
   }, [mintAddress, connection, metadataCreated]);
+  console.log(error)
 
   // Update the effect to only show modal on initial creation
   useEffect(() => {

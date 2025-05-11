@@ -1,8 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { MdSavings, MdSpeed, MdPriceCheck, MdAccountBalance, MdGroups, MdLink } from 'react-icons/md';
-import { useThemeContext } from '../hooks/useThemeContext';
-
 
 // Define the metric type
 interface Metric {
@@ -16,7 +14,7 @@ interface Metric {
 
 const MetricsScroller: React.FC<{ metrics: Metric[] }> = ({ metrics }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { theme } = useThemeContext();
+  // const { theme } = useThemeContext();
   
   // Map metrics to appropriate icons
   const getIconForMetric = (id: number) => {
@@ -85,7 +83,7 @@ import metricsData from "../protocolStats.json";
 const MetricsSection: React.FC = () => {
   // Type assertion to ensure metrics has the right type
   const typedMetrics = metricsData as Metric[];
-  const { theme } = useThemeContext();
+  // const { theme } = useThemeContext();
   
   return (
     <MetricsContainer>

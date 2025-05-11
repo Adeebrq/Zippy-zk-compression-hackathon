@@ -109,7 +109,7 @@ export const AddressMono = styled.span`
   font-family: monospace;
 `;
 
-const Modal = ({ isOpen, onClose, title, children, mintAddress, fetchedMetadata }: ModalProps) => {
+const Modal = ({ isOpen, onClose, title, children}: ModalProps) => {
   const { theme } = useThemeContext();
   const isDark = theme === 'dark';
   const [showConfetti, setShowConfetti] = useState(false);

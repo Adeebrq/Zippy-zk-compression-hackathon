@@ -66,12 +66,11 @@ export const CustomWalletProvider = ({ children }: { children: React.ReactNode }
 
   // Define which network we're using
   const [network, setNetwork] = useState("devnet");
+  setNetwork('devnet')
 
   // Create RPC endpoints based on the network
   const getRpcEndpoints = () => {
-    const networkUrl = network === "mainnet" 
-      ? `https://mainnet.helius-rpc.com?api-key=${apiKey}`
-      : `https://devnet.helius-rpc.com?api-key=${apiKey}`;
+    const networkUrl =`https://devnet.helius-rpc.com?api-key=${apiKey}`;
     
     return {
       RPC_ENDPOINT: networkUrl,
