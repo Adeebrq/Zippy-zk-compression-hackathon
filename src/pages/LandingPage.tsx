@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import BackgroundVideo from '../components/BackgroundVideo'
 import LandingPageInfo from '../components/LandingPageInfo';
@@ -96,22 +96,22 @@ const ButtonContainer = styled.div`
   gap: 1rem;
 `;
 
-const StyledButton = styled.button`
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
-  border: 2px solid #3b82f6;
-  background-color: transparent;
-  color: #3b82f6;
-  font-weight: 600;
-  cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.3s ease, background-color 0.3s ease;
+// const StyledButton = styled.button`
+//   padding: 1rem 2rem;
+//   border-radius: 0.5rem;
+//   border: 2px solid #3b82f6;
+//   background-color: transparent;
+//   color: #3b82f6;
+//   font-weight: 600;
+//   cursor: pointer;
+//   opacity: 0.6;
+//   transition: opacity 0.3s ease, background-color 0.3s ease;
 
-  &:hover {
-    opacity: 1;
-    background-color: rgba(59, 130, 246, 0.1); /* subtle blue on hover */
-  }
-`;
+//   &:hover {
+//     opacity: 1;
+//     background-color: rgba(59, 130, 246, 0.1); /* subtle blue on hover */
+//   }
+// `;
 
 
 // Container for the words with fixed position

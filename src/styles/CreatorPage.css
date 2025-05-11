@@ -247,9 +247,9 @@
     margin: 0;
   }
   
-  input[type="number"] {
+  /* input[type="number"] {
     -moz-appearance: textfield;
-  }
+  } */
   
   .form-hint {
     font-size: 0.75rem;

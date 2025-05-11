@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { ThemeProvider as CustomThemeProvider, useThemeContext } from './hooks/useThemeContext.tsx';
@@ -7,7 +6,6 @@ import CreatorPage from './pages/CreatorPage';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import BackgroundVideo from "./components/BackgroundVideo";
 
 import './App.css';
 import Layout from './layout/Layout';

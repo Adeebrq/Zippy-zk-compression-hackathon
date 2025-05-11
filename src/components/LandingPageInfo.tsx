@@ -1,13 +1,8 @@
-  import React from 'react';
   import styled, { keyframes } from 'styled-components';
-  import { useThemeContext } from '../hooks/useThemeContext';
-  import { MdConfirmationNumber, MdOfflineBolt ,  MdQrCode2, MdAccountBalanceWallet, MdLink } from 'react-icons/md';
-  import metrics from "../protocolStats.json"
+  import { MdConfirmationNumber, MdOfflineBolt ,  MdQrCode2, MdAccountBalanceWallet } from 'react-icons/md';
   import { MetricsSection } from './Metrics';
 
   const LandingPageInfo = () => {
-    const { theme } = useThemeContext();
-    
     return (
       <>
       <Container>

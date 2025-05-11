@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useEffect, useState } from 'react';
 import { LAMPORTS_PER_SOL, PublicKey, Transaction, Keypair, ComputeBudgetProgram } from '@solana/web3.js';
 import { CompressedTokenProgram,  getTokenPoolInfos, selectTokenPoolInfo } from '@lightprotocol/compressed-token';
@@ -25,7 +26,7 @@ import { debounce } from 'lodash';
 import '../styles/CreatorPage.css';
 import { useAnimatedValue } from '../hooks/useAnimatedValue';
 import { toast } from 'react-toastify';
-import { useRegularTokenAccounts} from '../hooks/useFetchMetadataTokens';
+
 import Modal, { SuccessMessage, SuccessTitle, TokenInfo, ShareLink, AddressMono } from '../components/Modal';
 import { useThemeContext } from '../hooks/useThemeContext';
 import ParticlesBackground from '../components/ParticlesBackground';
@@ -183,7 +184,7 @@ const CreatorPage = () => {
       );
 
       // Simulate transaction first - using connection prop from useWallet()
-      const createMintSimulation = await connection.simulateTransaction(createMintTransaction);
+      // const createMintSimulation = await connection.simulateTransaction(createMintTransaction);
 
       // Send the transaction
       const createMintTransactionSignature = await sendTransaction(
@@ -230,7 +231,7 @@ const CreatorPage = () => {
       );
 
       // Simulate transaction - using connection prop from useWallet()
-      const mintToSimulation = await connection.simulateTransaction(mintToTransaction);
+      // const mintToSimulation = await connection.simulateTransaction(mintToTransaction);
 
 
       // Send the transaction

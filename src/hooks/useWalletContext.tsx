@@ -1,15 +1,15 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createContext, useContext, useMemo, useEffect, useState } from "react";
 import { useWallet, WalletProvider as AdapterWalletProvider } from "@solana/wallet-adapter-react";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
-import { clusterApiUrl, Connection, PublicKey, Transaction } from "@solana/web3.js";
+import {PublicKey, Transaction } from "@solana/web3.js";
 import type { TransactionSignature } from "@solana/web3.js";
 import { Keypair } from "@solana/web3.js";
 import { SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
 import { Rpc, createRpc } from "@lightprotocol/stateless.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { doc, getDoc, } from 'firebase/firestore';
 import { firestore } from "../config/firebase";
-import bs58 from 'bs58';
 
 const apiKey = import.meta.env.VITE_HELIUS_API_KEY;
 

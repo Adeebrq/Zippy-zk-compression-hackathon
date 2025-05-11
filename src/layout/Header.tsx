@@ -1,4 +1,3 @@
-import React from 'react';
 import { useWalletContext } from '../hooks/useWalletContext';
 import styled, { keyframes } from 'styled-components';
 import { useThemeContext } from '../hooks/useThemeContext';
