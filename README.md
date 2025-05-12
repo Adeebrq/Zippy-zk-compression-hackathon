@@ -2,6 +2,11 @@
 
 ![Zippy Demo](https://drive.google.com/uc?export=view&id=1AoihE7WZ2UsifAqxGblqlLC-44659WKq)
 
+## ⚠️ Browser Compatibility
+
+The live project may not function correctly in Brave browser due to certain security settings.  
+For the best experience, please use **Google Chrome with phantom wallet**.
+
 ## Overview
 
 Zippy is a decentralized web application (dApp) built on Solana devnet network that empowers event organizers to mint compressed tokens as Proof-of-Participation (cPOPs), which attendees can claim by simply scanning a QR code. By leveraging zero-knowledge compression via Light Protocol, Zippy delivers a highly scalable, low-cost, and privacy-friendly experience for both creators and participants. This project was developed as part of the ZK Compression Track in the Solana Hackathon to showcase real-world utility for compressed tokens.
@@ -78,8 +83,26 @@ Zippy is a decentralized web application (dApp) built on Solana devnet network t
    - Set up a new project in the Firestore database using Firebase
    - Store a key pair which will sign all the airdrops on your behalf
    - Fetch the credentials for the database in project settings and paste them in the `.env` file as shown above
+  
+ 5.  **Store Solana Keypair in Firebase Firestore**
+- Go to [Firebase Console](https://console.firebase.google.com/)
+- Select your newly created project
+- Navigate to **Firestore Database** > **Start Collection**
 
-5. **Run the Development Server:**
+
+- Collection ID: `adminKeys`
+- Document ID: `keys`
+
+| Field Name  | Type   | Value                                                                                                 |
+|-------------|--------|-------------------------------------------------------------------------------------------------------|
+| `publicKey` | string | `"your publickey"`                                                        |
+| `secretKey` | string | `"hex coded private key"` |
+
+✅ Now your keypair is securely stored and can be retrieved in your local app.
+
+
+
+6. **Run the Development Server:**
    ```bash
    npm run dev
    ```
