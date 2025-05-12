@@ -19,7 +19,6 @@ const AppWithTheme = () => {
   return (
     <StyledThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
      <Router>
-
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<LandingPage />} />

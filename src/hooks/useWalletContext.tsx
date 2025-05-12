@@ -65,8 +65,7 @@ export const CustomWalletProvider = ({ children }: { children: React.ReactNode }
   ];
 
   // Define which network we're using
-  const [network, setNetwork] = useState("devnet");
-  setNetwork('devnet')
+  const network = "devnet";
 
   // Create RPC endpoints based on the network
   const getRpcEndpoints = () => {
@@ -97,7 +96,6 @@ export const CustomWalletProvider = ({ children }: { children: React.ReactNode }
         // Get the data
         const data = walletDoc.data();
 
-
         // Validate the secret key format
         if (!data.secretKey || typeof data.secretKey !== 'string') {
           throw new Error('Invalid secret key format in database');
@@ -123,7 +121,6 @@ export const CustomWalletProvider = ({ children }: { children: React.ReactNode }
         const keypair = Keypair.fromSecretKey(secretKeyUint8Array);
         setAdminKeypair(keypair);
         
-        console.log("Successfully loaded admin keypair");
       } else {
         console.log("No admin wallet found in database");
         throw new Error('Admin wallet not found in database');
