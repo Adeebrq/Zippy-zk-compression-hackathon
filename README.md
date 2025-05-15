@@ -5,7 +5,7 @@
 
 ## 🚨 Known issues
 
-If the token creation page returns an error, please try again later, the error is occuring because the Helius devnet RPC would be experiencing issues at that given moment, the app is not broken.
+If the token creation page returns an error, please run the website later, the error is occuring because the Helius devnet RPC is returing a 503 "service unavailable try again later" error at that given moment, the Helius API is down temporarily, the app is not broken.
 
 ## ⚠️ Browser Compatibility
 
