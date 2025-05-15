@@ -2,6 +2,11 @@
 
 ![Zippy Demo](https://drive.google.com/uc?export=view&id=1AoihE7WZ2UsifAqxGblqlLC-44659WKq)
 
+
+## 🚨 Known issues
+
+If the token creation page returns an error, please try again later, the error is occuring because the Helius devnet RPC would be experiencing issues at that given moment, the app is not broken.
+
 ## ⚠️ Browser Compatibility
 
 The live project may not function correctly in Brave browser due to certain security settings.  
