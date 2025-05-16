@@ -7,6 +7,8 @@
 
 If the token creation page returns an error, please run the website later, the error is occuring because the Helius devnet RPC is returing a 503 "service unavailable try again later" error at that given moment, the Helius API is down temporarily, the app is not broken.
 
+If token collection page returns an error, please ensure you are collecting via phantom on google chrome.
+
 ## ⚠️ Browser Compatibility
 
 The live project may not function correctly in Brave browser due to certain security settings.  
